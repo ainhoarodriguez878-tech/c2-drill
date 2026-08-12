@@ -6,7 +6,24 @@ import { EXAMPLES } from "./examples.js";
    Los distractores salen de otras palabras de la misma sección, así que
    siempre son del mismo registro y no se resuelven por descarte fácil. */
 
-const SECTIONS = ["academicas", "registro-alto", "ampliacion", "falsos-amigos"];
+const SECTIONS = [
+  "academicas",
+  "registro-alto",
+  "ampliacion",
+  "falsos-amigos",
+  "phrasal-movimiento",
+  "phrasal-comunicacion",
+  "idioms-c1c2",
+  "verb-noun-col",
+  "adj-noun-col",
+  "crime-law",
+  "science-tech",
+  "literary-art",
+  "formal-verbs",
+  "society-media",
+  "negative-vocab",
+  "degree-quantity",
+];
 
 const shuffle = (arr) => {
   const a = [...arr];
