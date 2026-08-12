@@ -53,7 +53,7 @@ export const ITEMS = [
   { id: "w14", type: "word", given: "COURAGE", text: "The preliminary results are genuinely ___.", answers: ["encouraging"], note: "courage → encourage → encouraging." },
   { id: "w15", type: "word", given: "CAPABLE", text: "The system's ___ has been consistently overstated.", answers: ["capability"], note: "capable → capability." },
   { id: "w16", type: "word", given: "LEAD", text: "Under her ___, the department doubled in size.", answers: ["leadership"], note: "lead → leader → leadership." },
-  { id: "w17", type: "word", given: "PERSUADE", text: "It is an elegant but ultimately un___ argument.", answers: ["persuasive", "unpersuasive"], note: "persuade → persuasive. Con el prefijo dado: unpersuasive." },
+  { id: "w17", type: "word", given: "PERSUADE", text: "It is an elegant but ultimately un___ argument.", answers: ["persuasive"], note: "persuade → persuasive → unpersuasive. El prefijo 'un' ya está en el texto." },
   { id: "w18", type: "word", given: "EXCEPT", text: "The response rate was ___ high for a postal survey.", answers: ["exceptionally"], note: "except → exception → exceptionally." },
   { id: "w19", type: "word", given: "RESOLVE", text: "The contradiction between the two studies remains ___.", answers: ["unresolved"], note: "resolve → resolved → unresolved." },
   { id: "w20", type: "word", given: "ASSUME", text: "The whole model rests on one shaky ___.", answers: ["assumption"], note: "assume → assumption." },
