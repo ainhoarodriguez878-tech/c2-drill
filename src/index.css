@@ -338,3 +338,40 @@
    ACCESIBILIDAD
    =================================================== */
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* ===================================================
+   BOTÓN DE PRONUNCIACIÓN TTS
+   =================================================== */
+.c2-speak-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 10px 0 4px;
+  padding: 5px 14px 5px 11px;
+  font-size: 13px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  color: var(--mute);
+  background: transparent;
+  border: 1px solid rgba(119,128,154,.35);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s, transform .1s;
+  user-select: none;
+}
+.c2-speak-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: rgba(22,35,61,.05);
+}
+.c2-speak-btn:active {
+  transform: scale(0.94);
+}
+.c2-root[data-dark="1"] .c2-speak-btn {
+  border-color: rgba(221,225,236,.2);
+}
+.c2-root[data-dark="1"] .c2-speak-btn:hover {
+  background: rgba(221,225,236,.07);
+  border-color: rgba(221,225,236,.5);
+  color: var(--ink);
+}

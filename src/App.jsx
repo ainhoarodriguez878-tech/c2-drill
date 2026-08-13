@@ -76,6 +76,7 @@ export default function App() {
   const timerRef    = useRef(null);
   const inputRef    = useRef(null);
   const examInputRef = useRef(null);
+  const voicesRef   = useRef([]);   // caché de voces TTS
 
   /* ---------------- carga desde localStorage ---------------- */
   useEffect(() => {
@@ -89,6 +90,14 @@ export default function App() {
       if (localStorage.getItem(DARK_KEY) === "1") setDark(true);
     } catch (e) { /* primera visita */ }
     setLoaded(true);
+  }, []);
+
+  /* --- precarga de voces TTS (necesario en Chrome/Edge) --- */
+  useEffect(() => {
+    const load = () => { voicesRef.current = window.speechSynthesis?.getVoices() || []; };
+    load();
+    window.speechSynthesis?.addEventListener("voiceschanged", load);
+    return () => window.speechSynthesis?.removeEventListener("voiceschanged", load);
   }, []);
 
   const persist = (np, ns) => {
@@ -158,6 +167,42 @@ export default function App() {
     persist({}, BLANK_STREAK);
     setNotice("Progreso borrado.");
     pickNext({}, filter);
+  };
+
+  /* ---------------- pronunciación TTS (inglés británico) ---------------- */
+  /** Devuelve el texto en inglés que debe pronunciarse según el tipo de ejercicio */
+  const getSpeakText = (item, isRevealed) => {
+    if (!item) return "";
+    if (item.type === "vocab") return item.word;
+    if (item.type === "gapped") {
+      const fill = isRevealed ? item.answers[0] : "";
+      return (item.sentences || []).map((s) => s.replace("___", fill)).join(". ");
+    }
+    if (item.type === "trans") {
+      // antes de responder: lee la frase fuente; después: lee la transformación completa
+      return isRevealed
+        ? (item.lead || "") + ". " + (item.text || "").replace("___", item.answers[0])
+        : (item.lead || "");
+    }
+    const fill = isRevealed ? item.answers[0] : "";
+    return (item.text || "").replace("___", fill);
+  };
+
+  const speak = (text) => {
+    if (!window.speechSynthesis || !text.trim()) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = "en-GB";
+    utt.rate = 0.88;
+    const voices = voicesRef.current;
+    const voice =
+      voices.find((v) => v.lang === "en-GB") ||
+      voices.find((v) => v.lang.startsWith("en-GB")) ||
+      voices.find((v) => v.lang === "en-US") ||
+      voices.find((v) => v.lang.startsWith("en")) ||
+      null;
+    if (voice) utt.voice = voice;
+    window.speechSynthesis.speak(utt);
   };
 
   /* ---------------- exportar / importar ---------------- */
@@ -433,6 +478,15 @@ export default function App() {
                   {examItem.given && <div className="c2-given">{examItem.given}</div>}
                   {renderQuestionBody(examItem, examParts)}
 
+                  {/* botón de pronunciación */}
+                  <button
+                    className="c2-speak-btn"
+                    onClick={() => speak(getSpeakText(examItem, !!examResult))}
+                    title="Pronunciación en inglés británico"
+                  >
+                    🔊
+                  </button>
+
                   {examItem.type === "mcq" || examItem.type === "vocab" ? (
                     <div className="c2-opts">
                       {(examItem.options || []).map((o) => {
@@ -582,6 +636,15 @@ export default function App() {
                   <>{drillParts[0]}<span className="c2-gap">&nbsp;</span>{drillParts[1]}</>
                 )}
               </div>
+
+              {/* botón de pronunciación */}
+              <button
+                className="c2-speak-btn"
+                onClick={() => speak(getSpeakText(current, !!result))}
+                title="Pronunciación en inglés británico"
+              >
+                🔊
+              </button>
 
               {current.type === "mcq" || current.type === "vocab" ? (
                 <div className="c2-opts">
