@@ -103,16 +103,20 @@ export default function App() {
   };
 
   /* ---------------- selección de ejercicio (drill) ---------------- */
-  const pickNext = (p = progress, f = filter) => {
+  const pickNext = (p = progress, f = filter, excludeId = null) => {
     const d      = today();
     const scope  = getScope(f, p);
     const source = scope.length ? scope : ITEMS;
-    const due    = source.filter((it) => p[it.id] && p[it.id].due <= d);
-    const fresh  = source.filter((it) => !p[it.id]);
-    const pool   = due.length ? due : fresh.length ? fresh : source;
-    let next = pool[Math.floor(Math.random() * pool.length)];
-    if (pool.length > 1 && current && next.id === current.id)
-      next = pool[(pool.indexOf(next) + 1) % pool.length];
+    const due    = source.filter((it) => p[it.id] && p[it.id].due <= d && it.id !== excludeId);
+    const fresh  = source.filter((it) => !p[it.id] && it.id !== excludeId);
+    // si no queda nada sin excluir, ampliamos sin filtrar el excludeId
+    const pool =
+      due.length   ? due :
+      fresh.length ? fresh :
+      source.filter((it) => it.id !== excludeId).length
+        ? source.filter((it) => it.id !== excludeId)
+        : source;
+    const next = pool[Math.floor(Math.random() * pool.length)];
     setCurrent(next);
     setInput("");
     setResult(null);
@@ -132,7 +136,9 @@ export default function App() {
     const ok  = current.answers.some((a) => norm(a) === norm(value));
     const st  = progress[current.id] || { box: 0 };
     const box = ok ? Math.min(st.box + 1, INTERVALS.length - 1) : 0;
-    const np  = { ...progress, [current.id]: { box, due: today() + INTERVALS[box], seen: (st.seen || 0) + 1 } };
+    // los fallos vuelven mañana (due = hoy+1), nunca hoy
+    const due = ok ? today() + INTERVALS[box] : today() + 1;
+    const np  = { ...progress, [current.id]: { box, due, seen: (st.seen || 0) + 1 } };
 
     const d      = today();
     const todayN = streak.todayDay === d ? streak.todayN + 1 : 1;
@@ -630,7 +636,7 @@ export default function App() {
                     Comprobar
                   </button>
                 ) : (
-                  <button className="c2-btn" onClick={() => pickNext()}>Siguiente</button>
+                  <button className="c2-btn" onClick={() => pickNext(progress, filter, current?.id)}>Siguiente</button>
                 )}
               </div>
 
@@ -639,7 +645,7 @@ export default function App() {
           )}
 
           <div className="c2-foot">
-            Los fallos vuelven al día siguiente; los aciertos se espacian a 1, 3, 7, 16 y 35 días.
+            Los fallos no vuelven hasta mañana; los aciertos se espacian a 1, 3, 7, 16 y 35 días.
             La racha suma cuando respondes {DAILY_GOAL} preguntas en un día; se pierde si te saltas
             un día entero. El progreso se guarda en este navegador.
             <br />
