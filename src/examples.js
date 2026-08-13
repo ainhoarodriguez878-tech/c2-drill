@@ -400,4 +400,27 @@ export const EXAMPLES = {
   "exponentially": ["The cost of the project grew exponentially.", "= at an increasingly rapid rate."],
   "marginally": ["The second candidate scored only marginally better than the first.", "= very slightly."],
   "precious few": ["There are precious few examples of this approach succeeding.", "= very few indeed (emphatic)."],
+
+  /* ===== NUEVAS PALABRAS ANOTADAS ===== */
+  syringes: ["The nurse disposed of the used syringes in a sealed container.", "syringe (sing.) → syringes (pl.). Incontable imposible."],
+  aim: ["The aim of the study is to map how startups communicate visually.", "aim (n.) = goal/purpose; aim TO do sth (v.) = aspirar a."],
+  intricacies: ["Few outsiders grasp the intricacies of academic funding.", "the intricacies of = los entresijos de; solo se usa en plural."],
+  uninitiated: ["To the uninitiated, the jargon can seem impenetrable.", "⚠️ Casi siempre en la frase fija «to the uninitiated» = para los no iniciados / profanos."],
+  "sliding door": ["The flat has a sliding door onto the balcony.", "sliding door = puerta corredera; revolving door = puerta giratoria."],
+  ceiling: ["Rents have hit a ceiling in the city centre.", "ceiling = techo literal; glass ceiling = techo de cristal; wage ceiling = tope salarial."],
+  edge: ["Fluency in English gives you a clear edge over other candidates.", "have/gain an edge (over sb) = tener ventaja; on the edge of = al borde de."],
+  boundaries: ["The project pushes the boundaries of qualitative analysis.", "push/cross/blur the boundaries; cf. border (frontera política)."],
+  border: ["They crossed the border at dawn.", "border = frontera política; cf. boundaries (límites conceptuales/personales)."],
+  vicinity: ["There are no pharmacies in the vicinity of the campus.", "⚠️ in the vicinity of también = approximately: in the vicinity of £500."],
+  reliable: ["The data come from a reliable source.", "reliable = fiable; reliability (n.); rely on (phrasal)."],
+  daunting: ["Writing a thesis can be daunting at first.", "a daunting task/prospect/challenge. Sinónimo: intimidating, overwhelming."],
+  "see fit to": ["Parliament saw fit to enact the reform without consultation.", "⚠️ see fit to + infinitive = juzgar oportuno; tono formal, a menudo crítico o irónico."],
+  succeeding: ["In the succeeding years, the policy was quietly dropped.", "⚠️ succeeding (adj.) = following, subsequent; NO confundir con succeed (v.) = tener éxito o suceder en un cargo."],
+  supply: ["The supply of housing has not kept pace with demand.", "supply and demand; supply sth TO sb (v.); supplies (pl.) = suministros, provisiones."],
+  arise: ["Several questions arose during the seminar.", "⚠️ Intransitivo: arise FROM sth = surgir de algo. NUNCA «arise a problem». Pasado: arose; participio: arisen."],
+  "lead to": ["Poor sampling leads to unreliable conclusions.", "lead TO + noun/gerund; sinónimos: result in, give rise to, bring about."],
+  retrace: ["She retraced her steps to find the missing key.", "retrace one's steps = desandar lo andado; retrace a route/journey = reconstruirlo paso a paso."],
+  regress: ["Without practice, your speaking will regress.", "⚠️ Connotación negativa: implica volver a un estado peor. regression (n.)."],
+  return: ["He returned to Madrid in June after a year abroad.", "return = volver/devolver (neutro); cf. retrace (desandar), regress (retroceder a peor estado), resume (reanudar)."],
 };
+
