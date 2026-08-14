@@ -7,7 +7,7 @@ const ITEMS = [...EXAM_ITEMS, ...VOCAB_ITEMS];
 
 const STORE_KEY = "c2drill:state";
 const DARK_KEY  = "c2drill:dark";
-const INTERVALS  = [0, 1, 3, 7, 16, 35]; // días de espera por caja
+const INTERVALS  = [0, 7, 15, 30, 60, 90]; // días de espera por caja (los fallos se repasan al día siguiente)
 const DAILY_GOAL  = 5;                    // preguntas para que el día cuente
 const EXAM_Q      = 10;                   // preguntas por sesión de examen
 const EXAM_SECS   = 12 * 60;             // 12 minutos
@@ -118,15 +118,38 @@ export default function App() {
     const d      = today();
     const scope  = getScope(f, p);
     const source = scope.length ? scope : ITEMS;
-    const due    = source.filter((it) => p[it.id] && p[it.id].due <= d && it.id !== excludeId);
-    const fresh  = source.filter((it) => !p[it.id] && it.id !== excludeId);
-    // si no queda nada sin excluir, ampliamos sin filtrar el excludeId
-    const pool =
-      due.length   ? due :
-      fresh.length ? fresh :
-      source.filter((it) => it.id !== excludeId).length
-        ? source.filter((it) => it.id !== excludeId)
-        : source;
+
+    // 1. Fallos pendientes (due y box === 0)
+    const dueFailed = source.filter(
+      (it) => p[it.id] && p[it.id].due <= d && p[it.id].box === 0 && it.id !== excludeId
+    );
+
+    // 2. Ítems nuevos / sin ver
+    const fresh = source.filter(
+      (it) => !p[it.id] && it.id !== excludeId
+    );
+
+    // 3. Aciertos pendientes (due y box > 0)
+    const duePassed = source.filter(
+      (it) => p[it.id] && p[it.id].due <= d && p[it.id].box > 0 && it.id !== excludeId
+    );
+
+    let pool = [];
+    if (dueFailed.length) {
+      // Prioridad máxima: repasar los fallos del día anterior
+      pool = dueFailed;
+    } else if (fresh.length) {
+      // Prioridad media: aprender palabras nuevas del listado
+      pool = fresh;
+    } else if (duePassed.length) {
+      // Prioridad baja: repasar aciertos anteriores una vez agotado el listado de nuevas
+      pool = duePassed;
+    } else {
+      // Fallback: si no hay pendientes ni nuevos, mostramos cualquiera menos el actual
+      pool = source.filter((it) => it.id !== excludeId);
+      if (pool.length === 0) pool = source;
+    }
+
     const next = pool[Math.floor(Math.random() * pool.length)];
     setCurrent(next);
     setInput("");
@@ -738,7 +761,7 @@ export default function App() {
           )}
 
           <div className="c2-foot">
-            Los fallos no vuelven hasta mañana; los aciertos se espacian a 1, 3, 7, 16 y 35 días.
+            Los fallos no vuelven hasta mañana; los aciertos se espacian a 7, 15, 30, 60 y 90 días.
             La racha suma cuando respondes {DAILY_GOAL} preguntas en un día; se pierde si te saltas
             un día entero. El progreso se guarda en este navegador.
             <br />
