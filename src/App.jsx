@@ -18,7 +18,8 @@ const LABEL = {
   trans:  "Key word transformation",
   mcq:    "Multiple-choice cloze",
   gapped: "Gapped sentences",
-  vocab:  "Vocabulario",
+  vocab:  "Vocabulario (Test)",
+  vocab_write: "Vocabulario (Escribir)",
 };
 
 const FILTERS = [
@@ -28,7 +29,8 @@ const FILTERS = [
   { key: "trans",  label: "Transform." },
   { key: "gapped", label: "Triples" },
   { key: "mcq",    label: "Opciones" },
-  { key: "vocab",  label: "Vocab" },
+  { key: "vocab",  label: "Vocab (Test)" },
+  { key: "vocab_write", label: "Vocab (Escribir)" },
   { key: "errors", label: "Errores" },
 ];
 
@@ -137,6 +139,9 @@ export default function App() {
   useEffect(() => {
     if (current && current.type !== "mcq" && current.type !== "vocab" && inputRef.current)
       inputRef.current.focus();
+    if (current && current.type === "vocab_write" && current.isSpelling) {
+      setTimeout(() => { speak(current.word); }, 150);
+    }
   }, [current]);
 
   /* ---------------- corrección + spaced repetition (drill) ---------------- */
@@ -281,6 +286,9 @@ export default function App() {
     if (view === "exam" && examRunning && examInputRef.current) {
       const item = examItems[examIndex];
       if (item && item.type !== "mcq" && item.type !== "vocab") examInputRef.current.focus();
+      if (item && item.type === "vocab_write" && item.isSpelling) {
+        setTimeout(() => { speak(item.word); }, 150);
+      }
     }
   }, [examIndex, examRunning, view]);
 
@@ -299,7 +307,8 @@ export default function App() {
     { key: "trans",  label: "Key word transf." },
     { key: "gapped", label: "Gapped sentences" },
     { key: "mcq",    label: "Multiple-choice" },
-    { key: "vocab",  label: "Vocabulario" },
+    { key: "vocab",  label: "Vocabulario (Test)" },
+    { key: "vocab_write", label: "Vocabulario (Escribir)" },
   ].map((f) => {
     const items    = ITEMS.filter((it) => it.type === f.key);
     const seen     = items.filter((it) => progress[it.id]);
@@ -321,6 +330,12 @@ export default function App() {
       <div className="c2-text">
         {item.type === "vocab" ? (
           <span className="c2-word">{item.word}</span>
+        ) : item.type === "vocab_write" ? (
+          item.text.includes("___") ? (
+            <>{(examParts || parts)[0]}<span className="c2-gap">&nbsp;</span>{(examParts || parts)[1]}</>
+          ) : (
+            <span>{item.text}</span>
+          )
         ) : item.type === "gapped" ? (
           <ol className="c2-triple">
             {(item.sentences || []).map((s, i) => {
@@ -452,6 +467,7 @@ export default function App() {
                     { key: "trans",  label: "Key word transformation" },
                     { key: "mcq",    label: "Multiple-choice" },
                     { key: "gapped", label: "Gapped sentences" },
+                    { key: "vocab_write", label: "Vocabulario (Escribir)" },
                   ].map((f) => (
                     <button key={f.key} className="c2-btn ghost c2-exam-pick" onClick={() => startExam(f.key)}>
                       {f.label}
@@ -475,7 +491,9 @@ export default function App() {
                 <div className="c2-card">
                   <div className="c2-tag">{LABEL[examItem.type]}</div>
                   {examItem.lead  && <div className="c2-lead">{examItem.lead}</div>}
-                  {examItem.given && <div className="c2-given">{examItem.given}</div>}
+                  {(examItem.type === "vocab_write" ? examItem.gloss : examItem.given) && (
+                    <div className="c2-given">{examItem.type === "vocab_write" ? examItem.gloss : examItem.given}</div>
+                  )}
                   {renderQuestionBody(examItem, examParts)}
 
                   {/* botón de pronunciación */}
@@ -504,7 +522,12 @@ export default function App() {
                       className="c2-field"
                       value={examInput}
                       disabled={!!examResult}
-                      placeholder={examItem.type === "trans" ? "escribe las palabras que faltan" : examItem.type === "gapped" ? "una palabra para las tres" : "escribe la palabra"}
+                      placeholder={
+                        examItem.type === "trans" ? "escribe las palabras que faltan" :
+                        examItem.type === "gapped" ? "una palabra para las tres" :
+                        examItem.type === "vocab_write" ? "escribe la traducción (forma base)" :
+                        "escribe la palabra"
+                      }
                       onChange={(e) => setExamInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { if (examResult) nextExamQ(); else if (examInput.trim()) gradeExam(examInput); } }}
                     />
@@ -620,7 +643,9 @@ export default function App() {
             <div className="c2-card">
               <div className="c2-tag">{LABEL[current.type]}</div>
               {current.lead  && <div className="c2-lead">{current.lead}</div>}
-              {current.given && <div className="c2-given">{current.given}</div>}
+              {(current.type === "vocab_write" ? current.gloss : current.given) && (
+                <div className="c2-given">{current.type === "vocab_write" ? current.gloss : current.given}</div>
+              )}
 
               <div className="c2-text">
                 {current.type === "vocab" ? (
@@ -663,9 +688,14 @@ export default function App() {
                   className="c2-field"
                   value={input}
                   disabled={!!result}
-                  placeholder={current.type === "trans" ? "escribe las palabras que faltan" : current.type === "gapped" ? "una palabra que valga para las tres" : "escribe la palabra"}
+                  placeholder={
+                    current.type === "trans" ? "escribe las palabras que faltan" :
+                    current.type === "gapped" ? "una palabra que valga para las tres" :
+                    current.type === "vocab_write" ? "escribe la traducción (forma base)" :
+                    "escribe la palabra"
+                  }
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { if (result) pickNext(); else if (input.trim()) grade(input); } }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { if (result) pickNext(progress, filter, current?.id); else if (input.trim()) grade(input); } }}
                 />
               )}
 
