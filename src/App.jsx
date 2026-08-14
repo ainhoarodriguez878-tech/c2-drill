@@ -202,6 +202,13 @@ export default function App() {
   const getSpeakText = (item, isRevealed) => {
     if (!item) return "";
     if (item.type === "vocab") return item.word;
+    if (item.type === "vocab_write") {
+      if (item.isSpelling) return item.word;
+      if (item.example) {
+        return isRevealed ? item.example : item.text;
+      }
+      return isRevealed ? item.word : "";
+    }
     if (item.type === "gapped") {
       const fill = isRevealed ? item.answers[0] : "";
       return (item.sentences || []).map((s) => s.replace("___", fill)).join(". ");
