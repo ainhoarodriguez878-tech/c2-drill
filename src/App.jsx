@@ -564,7 +564,7 @@ export default function App() {
                       placeholder={
                         examItem.type === "trans" ? "escribe las palabras que faltan" :
                         examItem.type === "gapped" ? "una palabra para las tres" :
-                        examItem.type === "vocab_write" ? "escribe la traducción (forma base)" :
+                        examItem.type === "vocab_write" ? (examItem.isSpelling ? "escribe la palabra pronunciada" : "escribe la traducción (forma base)") :
                         "escribe la palabra"
                       }
                       onChange={(e) => setExamInput(e.target.value)}
@@ -744,7 +744,7 @@ export default function App() {
                   placeholder={
                     current.type === "trans" ? "escribe las palabras que faltan" :
                     current.type === "gapped" ? "una palabra que valga para las tres" :
-                    current.type === "vocab_write" ? "escribe la traducción (forma base)" :
+                    current.type === "vocab_write" ? (current.isSpelling ? "escribe la palabra pronunciada" : "escribe la traducción (forma base)") :
                     "escribe la palabra"
                   }
                   onChange={(e) => setInput(e.target.value)}
