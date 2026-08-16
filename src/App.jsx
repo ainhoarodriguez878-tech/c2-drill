@@ -528,7 +528,7 @@ export default function App() {
                   {/* Pista: traduccion al espanol de la frase (visible antes de responder) */}
                   {examItem.type === "vocab_write" && examItem.exampleEs && !examResult && (
                     <div className="c2-hint-es">
-                      <span className="c2-hint-label">Traducción: </span>
+                      <span className="c2-hint-label">{examItem.isSpelling ? "Significado: " : "Traducción: "}</span>
                       {examItem.exampleEs}
                     </div>
                   )}
@@ -695,7 +695,7 @@ export default function App() {
               {/* Pista: traduccion al espanol de la frase (visible antes de responder) */}
               {current.type === "vocab_write" && current.exampleEs && !result && (
                 <div className="c2-hint-es">
-                  <span className="c2-hint-label">Traduccion: </span>
+                  <span className="c2-hint-label">{current.isSpelling ? "Significado: " : "Traduccion: "}</span>
                   {current.exampleEs}
                 </div>
               )}
@@ -763,6 +763,13 @@ export default function App() {
                     <div className="c2-example-block">
                       <div className="c2-example">{current.example}</div>
                       {current.exampleEs && <div className="c2-example-es">{current.exampleEs}</div>}
+                    </div>
+                  )}
+                  {current.isSpelling && current.exampleEs && (
+                    <div className="c2-example-block">
+                      <div className="c2-example-es" style={{ marginTop: "8px", fontSize: "14px", color: "var(--mute)" }}>
+                        Significado: {current.exampleEs}
+                      </div>
                     </div>
                   )}
                   {(current.type === "mcq" || current.type === "vocab") && current.whyNot && (

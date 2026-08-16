@@ -45,7 +45,7 @@ function getExampleAndNote(word) {
 }
 
 function maskWord(sentence, word) {
-  if (!sentence) return "";
+  if (!sentence) return { maskedText: "", answers: [word] };
   
   let targets = [word];
   if (word.includes("→")) {
@@ -53,48 +53,83 @@ function maskWord(sentence, word) {
   }
 
   let text = sentence;
+  let answers = [word];
+
+  const irregulars = {
+    bring: "brought",
+    go: "went|gone",
+    seek: "sought",
+    teach: "taught",
+    think: "thought",
+    buy: "bought",
+    catch: "caught",
+    draw: "drew|drawn",
+    fall: "fell|fallen",
+    give: "gave|given",
+    run: "ran",
+    take: "took|taken",
+    see: "saw|seen",
+    write: "wrote|written",
+    rose: "rose",
+    arise: "arose|arisen",
+    hold: "held",
+    stem: "stemmed",
+    bind: "bound",
+    find: "found",
+    strike: "struck",
+    bear: "bore|borne",
+    cast: "cast",
+    shake: "shook|shaken",
+    speak: "spoke|spoken",
+    wear: "wore|worn"
+  };
 
   for (const t of targets) {
     const cleanT = t.replace(/\b(sth|sb|oneself|one's|to)\b/gi, "").trim();
     if (!cleanT) continue;
 
+    // 1. Try contiguous match first (matching all words of the phrase contiguously with potential inflections)
+    const phraseParts = cleanT.split(/\s+/).filter(Boolean);
+    if (phraseParts.length > 0) {
+      const contiguousPattern = phraseParts.map((part) => {
+        const escapedPart = part.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        let p = escapedPart;
+        if (irregulars[part]) {
+          p = `(${escapedPart}|${irregulars[part]})`;
+        }
+        return `\\b${p}(s|ed|ing|d|es|med|ned|ted|red|ged)?\\b`;
+      }).join("\\s+");
+
+      try {
+        const regexContiguous = new RegExp(contiguousPattern, 'gi');
+        const match = text.match(regexContiguous);
+        if (match) {
+          text = text.replace(regexContiguous, "___");
+          for (const m of match) {
+            if (!answers.includes(m)) answers.push(m);
+          }
+          continue;
+        }
+      } catch (e) {
+        // ignore regex error and fall through
+      }
+    }
+
+    // 2. Fallback to individual parts matching (useful if phrase is split in the sentence)
     const parts = cleanT.split(/\s+/).filter((p) => p.length > 2);
     
     if (parts.length === 0) {
       const escaped = t.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       const regex = new RegExp('\\b' + escaped + '(s|ed|ing|d|es)?\\b', 'gi');
-      text = text.replace(regex, "___");
+      const match = text.match(regex);
+      if (match) {
+        text = text.replace(regex, "___");
+        for (const m of match) {
+          if (!answers.includes(m)) answers.push(m);
+        }
+      }
       continue;
     }
-
-    const irregulars = {
-      bring: "brought",
-      go: "went|gone",
-      seek: "sought",
-      teach: "taught",
-      think: "thought",
-      buy: "bought",
-      catch: "caught",
-      draw: "drew|drawn",
-      fall: "fell|fallen",
-      give: "gave|given",
-      run: "ran",
-      take: "took|taken",
-      see: "saw|seen",
-      write: "wrote|written",
-      rose: "rose",
-      arise: "arose|arisen",
-      hold: "held",
-      stem: "stemmed",
-      bind: "bound",
-      find: "found",
-      strike: "struck",
-      bear: "bore|borne",
-      cast: "cast",
-      shake: "shook|shaken",
-      speak: "spoke|spoken",
-      wear: "wore|worn"
-    };
 
     let patternStr = parts.map((part) => {
       const escapedPart = part.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -107,19 +142,32 @@ function maskWord(sentence, word) {
 
     try {
       const regex = new RegExp(patternStr, 'gi');
-      text = text.replace(regex, "___");
+      const match = text.match(regex);
+      if (match) {
+        text = text.replace(regex, "___");
+        for (const m of match) {
+          if (!answers.includes(m)) answers.push(m);
+        }
+      }
     } catch (e) {
       const escapedT = t.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-      text = text.replace(new RegExp(escapedT, 'gi'), "___");
+      const regex = new RegExp(escapedT, 'gi');
+      const match = text.match(regex);
+      if (match) {
+        text = text.replace(regex, "___");
+        for (const m of match) {
+          if (!answers.includes(m)) answers.push(m);
+        }
+      }
     }
   }
 
   // Si no se pudo enmascarar nada, forzar un ___
   if (text === sentence && sentence.length > 0) {
-    return sentence + " (___)";
+    text = sentence + " (___)";
   }
 
-  return text;
+  return { maskedText: text, answers };
 }
 
 function build() {
@@ -174,15 +222,15 @@ function build() {
       });
 
       // 2. Modo Escribir/Deletrear (vocab_write)
-      const maskedText = maskWord(example, word);
+      const { maskedText, answers } = maskWord(example, word);
       out.push({
         id: `vw-${word}`,
         type: "vocab_write",
         word,
         text: maskedText || `Traduce al inglés: «${gloss}»`,
         gloss,
-        options: [word],
-        answers: [word],
+        options: answers,
+        answers: answers,
         example,
         exampleEs: exampleEs || "",
         note: extra || "",
@@ -322,11 +370,11 @@ const SPELLING_TRANSLATIONS = {
         type: "vocab_write",
         word: spellingWord,
         text: `Escribe correctamente la palabra pronunciada (${spellingWord.length} letras)`,
-        gloss: realGloss ? `Ortografía: ${realGloss}` : "Spelling / Ortografía",
+        gloss: "Ortografía",
         options: [spellingWord],
         answers: [spellingWord],
         example: spExample || "",
-        exampleEs: spExampleEs || "",
+        exampleEs: realGloss || "",
         note: spExtra || "Esta palabra suele escribirse incorrectamente.",
         isSpelling: true
       });
