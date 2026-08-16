@@ -167,6 +167,19 @@
 .c2-verdict { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; }
 .c2-sol     { font-family: 'Newsreader', Georgia, serif; font-size: 19px; margin: 8px 0 6px; }
 .c2-note    { font-size: 12px; line-height: 1.6; color: var(--mute); }
+
+/* ejemplo en inglés + traducción al español */
+.c2-example-block {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(22,35,61,.04);
+  border-left: 2px solid var(--pen);
+  border-radius: 0 2px 2px 0;
+}
+.c2-root[data-dark="1"] .c2-example-block { background: rgba(221,225,236,.05); }
+.c2-example    { font-family: 'Newsreader', Georgia, serif; font-size: 15px; font-style: italic; line-height: 1.55; color: var(--ink); }
+.c2-example-es { font-size: 12px; line-height: 1.5; color: var(--mute); margin-top: 5px; }
+
 .c2-why     { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(22,35,61,.14); }
 .c2-why-h   { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); font-weight: 600; margin-bottom: 9px; }
 .c2-why-row { display: flex; gap: 10px; font-size: 12px; line-height: 1.55; color: var(--mute); margin-bottom: 7px; }

@@ -570,6 +570,12 @@ export default function App() {
                       </div>
                       <div className="c2-sol">{examItem.answers[0]}</div>
                       {examItem.note && <div className="c2-note">{examItem.note}</div>}
+                      {examItem.example && (
+                        <div className="c2-example-block">
+                          <div className="c2-example">{examItem.example}</div>
+                          {examItem.exampleEs && <div className="c2-example-es">{examItem.exampleEs}</div>}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -735,8 +741,13 @@ export default function App() {
                     {result === "right" ? "Correcto" : "Fallo — vuelve mañana"}
                   </div>
                   <div className="c2-sol">{current.answers[0]}</div>
-                  {current.example && <div className="c2-example">{current.example}</div>}
-                  {current.note    && <div className="c2-note">{current.note}</div>}
+                  {current.note && <div className="c2-note">{current.note}</div>}
+                  {current.example && (
+                    <div className="c2-example-block">
+                      <div className="c2-example">{current.example}</div>
+                      {current.exampleEs && <div className="c2-example-es">{current.exampleEs}</div>}
+                    </div>
+                  )}
                   {(current.type === "mcq" || current.type === "vocab") && current.whyNot && (
                     <div className="c2-why">
                       <div className="c2-why-h">Por qué las otras no</div>

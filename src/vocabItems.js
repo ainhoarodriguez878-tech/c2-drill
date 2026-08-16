@@ -140,7 +140,7 @@ function build() {
         owner[g] = w;
       });
 
-      const [example, extra] = getExampleAndNote(word);
+      const [example, extra, exampleEs] = getExampleAndNote(word);
       const whyNot = {};
       others.forEach(([, g]) => {
         whyNot[g] = `Ese es el significado de «${owner[g]}».`;
@@ -155,6 +155,7 @@ function build() {
         options: shuffle([gloss, ...others.map(([, g]) => g)]),
         answers: [gloss],
         example,
+        exampleEs: exampleEs || "",
         note: extra || "",
         whyNot,
       });
@@ -170,6 +171,7 @@ function build() {
         options: [word],
         answers: [word],
         example,
+        exampleEs: exampleEs || "",
         note: extra || "",
       });
     }
