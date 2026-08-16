@@ -21,6 +21,7 @@ const SECTIONS = [
   "society-media",
   "negative-vocab",
   "degree-quantity",
+  "lexico-adicional",
 ];
 
 const shuffle = (arr) => {
