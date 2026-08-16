@@ -524,6 +524,15 @@ export default function App() {
                   {(examItem.type === "vocab_write" ? examItem.gloss : examItem.given) && (
                     <div className="c2-given">{examItem.type === "vocab_write" ? examItem.gloss : examItem.given}</div>
                   )}
+
+                  {/* Pista: traduccion al espanol de la frase (visible antes de responder) */}
+                  {examItem.type === "vocab_write" && examItem.exampleEs && !examResult && (
+                    <div className="c2-hint-es">
+                      <span className="c2-hint-label">Traducción: </span>
+                      {examItem.exampleEs}
+                    </div>
+                  )}
+
                   {renderQuestionBody(examItem, examParts)}
 
                   {/* botón de pronunciación */}
@@ -681,6 +690,14 @@ export default function App() {
               {current.lead  && <div className="c2-lead">{current.lead}</div>}
               {(current.type === "vocab_write" ? current.gloss : current.given) && (
                 <div className="c2-given">{current.type === "vocab_write" ? current.gloss : current.given}</div>
+              )}
+
+              {/* Pista: traduccion al espanol de la frase (visible antes de responder) */}
+              {current.type === "vocab_write" && current.exampleEs && !result && (
+                <div className="c2-hint-es">
+                  <span className="c2-hint-label">Traduccion: </span>
+                  {current.exampleEs}
+                </div>
               )}
 
               <div className="c2-text">

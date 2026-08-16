@@ -180,6 +180,33 @@
 .c2-example    { font-family: 'Newsreader', Georgia, serif; font-size: 15px; font-style: italic; line-height: 1.55; color: var(--ink); }
 .c2-example-es { font-size: 12px; line-height: 1.5; color: var(--mute); margin-top: 5px; }
 
+/* pista de traduccion en español */
+.c2-hint-es {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mute);
+  margin: 12px 0;
+  padding: 8px 12px;
+  background: rgba(22,35,61,.03);
+  border-left: 2px solid rgba(22,35,61,.15);
+  border-radius: 0 2px 2px 0;
+  text-align: left;
+}
+.c2-root[data-dark="1"] .c2-hint-es {
+  background: rgba(221,225,236,.03);
+  border-left-color: rgba(221,225,236,.15);
+}
+.c2-hint-label {
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 3px;
+  color: var(--mute);
+  opacity: 0.8;
+}
+
 .c2-why     { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(22,35,61,.14); }
 .c2-why-h   { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); font-weight: 600; margin-bottom: 9px; }
 .c2-why-row { display: flex; gap: 10px; font-size: 12px; line-height: 1.55; color: var(--mute); margin-bottom: 7px; }

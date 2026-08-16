@@ -125,6 +125,18 @@ function build() {
   const seen = new Set();
   const out = [];
 
+  // Mapa global palabra→gloss para poder consultar cualquier palabra
+  const glossMap = {};
+  for (const sec of VOCAB) {
+    if (!Array.isArray(sec.items)) continue;
+    for (const item of sec.items) {
+      if (Array.isArray(item) && item.length >= 2) {
+        const [w, g] = item;
+        if (!glossMap[w]) glossMap[w] = g;
+      }
+    }
+  }
+
   for (const secId of SECTIONS) {
     const sec = VOCAB.find((s) => s.id === secId);
     if (!sec) continue;
@@ -181,16 +193,19 @@ function build() {
   const faltasSec = VOCAB.find((s) => s.id === "faltas");
   if (faltasSec && Array.isArray(faltasSec.items)) {
     for (const spellingWord of faltasSec.items) {
+      const realGloss = glossMap[spellingWord] || "";
+      const [spExample, spExtra, spExampleEs] = getExampleAndNote(spellingWord);
       out.push({
         id: `vw-spelling-${spellingWord}`,
         type: "vocab_write",
         word: spellingWord,
         text: `Escribe correctamente la palabra pronunciada (${spellingWord.length} letras)`,
-        gloss: "Spelling / Ortografía",
+        gloss: realGloss || "Spelling / Ortografía",
         options: [spellingWord],
         answers: [spellingWord],
-        example: "",
-        note: "Esta palabra suele escribirse incorrectamente. ¡Presta atención a las letras dobles!",
+        example: spExample || "",
+        exampleEs: spExampleEs || "",
+        note: spExtra || "Esta palabra suele escribirse incorrectamente.",
         isSpelling: true
       });
     }
