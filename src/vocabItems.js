@@ -44,13 +44,112 @@ function getExampleAndNote(word) {
   return [];
 }
 
+function inflectSingleLike(baseToInflect, matchedWord, matchedBase) {
+  const m = matchedWord.toLowerCase();
+  const b = matchedBase.toLowerCase();
+  const target = baseToInflect.toLowerCase();
+  
+  if (m === b) return [target];
+  
+  const irregulars = {
+    show: { past: ["showed", "shown"], ing: ["showing"], s: ["shows"] },
+    demonstrate: { past: ["demonstrated"], ing: ["demonstrating"], s: ["demonstrates"] },
+    illustrate: { past: ["illustrated"], ing: ["illustrating"], s: ["illustrates"] },
+    reveal: { past: ["revealed"], ing: ["revealing"], s: ["reveals"] },
+    go: { past: ["went", "gone"], ing: ["going"], s: ["goes"] },
+    take: { past: ["took", "taken"], ing: ["taking"], s: ["takes"] },
+    bring: { past: ["brought"], ing: ["bringing"], s: ["brings"] },
+    seek: { past: ["sought"], ing: ["seeking"], s: ["seeks"] },
+    teach: { past: ["taught"], ing: ["teaching"], s: ["teaches"] },
+    think: { past: ["thought"], ing: ["thinking"], s: ["thinks"] },
+    buy: { past: ["bought"], ing: ["buying"], s: ["buys"] },
+    catch: { past: ["caught"], ing: ["catching"], s: ["catches"] },
+    draw: { past: ["drew", "drawn"], ing: ["drawing"], s: ["draws"] },
+    fall: { past: ["fell", "fallen"], ing: ["falling"], s: ["falls"] },
+    give: { past: ["gave", "given"], ing: ["giving"], s: ["gives"] },
+    run: { past: ["ran"], ing: ["running"], s: ["runs"] },
+    see: { past: ["saw", "seen"], ing: ["seeing"], s: ["sees"] },
+    write: { past: ["wrote", "written"], ing: ["writing"], s: ["writes"] },
+    arise: { past: ["arose", "arisen"], ing: ["arising"], s: ["arises"] },
+    hold: { past: ["held"], ing: ["holding"], s: ["holds"] },
+    stem: { past: ["stemmed"], ing: ["stemming"], s: ["stems"] },
+    bind: { past: ["bound"], ing: ["binding"], s: ["binds"] },
+    find: { past: ["found"], ing: ["finding"], s: ["finds"] },
+    strike: { past: ["struck"], ing: ["striking"], s: ["strikes"] },
+    bear: { past: ["bore", "borne"], ing: ["bearing"], s: ["bears"] },
+    cast: { past: ["cast"], ing: ["casting"], s: ["casts"] },
+    shake: { past: ["shook", "shaken"], ing: ["shaking"], s: ["shakes"] },
+    speak: { past: ["spoke", "spoken"], ing: ["speaking"], s: ["speaks"] },
+    wear: { past: ["wore", "worn"], ing: ["wearing"], s: ["wears"] }
+  };
+
+  let type = null;
+  if (m.endsWith("ing")) {
+    type = "ing";
+  } else if (m.endsWith("s") || m.endsWith("es")) {
+    type = "s";
+  } else if (m.endsWith("ed") || m.endsWith("d") || (irregulars[b] && irregulars[b].past.includes(m))) {
+    type = "past";
+  }
+
+  if (type) {
+    if (irregulars[target] && irregulars[target][type]) {
+      return irregulars[target][type];
+    }
+    // General rules
+    if (type === "s") {
+      if (target.endsWith("s") || target.endsWith("sh") || target.endsWith("ch") || target.endsWith("x") || target.endsWith("z")) {
+        return [target + "es"];
+      }
+      if (target.endsWith("y") && !/[aeiou]y$/i.test(target)) {
+        return [target.slice(0, -1) + "ies"];
+      }
+      return [target + "s"];
+    }
+    if (type === "ing") {
+      if (target.endsWith("e") && !target.endsWith("ee") && !target.endsWith("oe") && !target.endsWith("ye")) {
+        return [target.slice(0, -1) + "ing"];
+      }
+      return [target + "ing"];
+    }
+    if (type === "past") {
+      if (target.endsWith("e")) {
+        return [target + "d"];
+      }
+      if (target.endsWith("y") && !/[aeiou]y$/i.test(target)) {
+        return [target.slice(0, -1) + "ied"];
+      }
+      return [target + "ed"];
+    }
+  }
+
+  return [target];
+}
+
+function inflectLike(baseToInflect, matchedWord, matchedBase) {
+  const baseParts = baseToInflect.split(/\s+/);
+  const matchedParts = matchedWord.split(/\s+/);
+  const matchedBaseParts = matchedBase.split(/\s+/);
+
+  if (baseParts.length > 1 || matchedParts.length > 1 || matchedBaseParts.length > 1) {
+    const inflectedFirsts = inflectSingleLike(baseParts[0], matchedParts[0] || "", matchedBaseParts[0] || "");
+    const baseRest = baseParts.slice(1).join(" ");
+    return inflectedFirsts.map((inflectedFirst) => inflectedFirst + (baseRest ? " " + baseRest : ""));
+  }
+
+  return inflectSingleLike(baseToInflect, matchedWord, matchedBase);
+}
+
 function maskWord(sentence, word) {
   if (!sentence) return { maskedText: "", answers: [word] };
   
+  const baseWord = word.includes("→") ? word.split("→")[0].trim() : word;
   let targets = [word];
   if (word.includes("→")) {
     targets = word.split("→")[1].split("/").map((p) => p.trim());
   }
+
+  const allBases = word.includes("→") ? [baseWord, ...targets] : [word];
 
   let text = sentence;
   let answers = [word];
@@ -107,6 +206,14 @@ function maskWord(sentence, word) {
           text = text.replace(regexContiguous, "___");
           for (const m of match) {
             if (!answers.includes(m)) answers.push(m);
+            for (const b of allBases) {
+              const inflectedForms = inflectLike(b, m, cleanT);
+              for (const inf of inflectedForms) {
+                if (inf && !answers.includes(inf)) {
+                  answers.push(inf);
+                }
+              }
+            }
           }
           continue;
         }
@@ -126,6 +233,14 @@ function maskWord(sentence, word) {
         text = text.replace(regex, "___");
         for (const m of match) {
           if (!answers.includes(m)) answers.push(m);
+          for (const b of allBases) {
+            const inflectedForms = inflectLike(b, m, cleanT);
+            for (const inf of inflectedForms) {
+              if (inf && !answers.includes(inf)) {
+                answers.push(inf);
+              }
+            }
+          }
         }
       }
       continue;
@@ -147,6 +262,14 @@ function maskWord(sentence, word) {
         text = text.replace(regex, "___");
         for (const m of match) {
           if (!answers.includes(m)) answers.push(m);
+          for (const b of allBases) {
+            const inflectedForms = inflectLike(b, m, cleanT);
+            for (const inf of inflectedForms) {
+              if (inf && !answers.includes(inf)) {
+                answers.push(inf);
+              }
+            }
+          }
         }
       }
     } catch (e) {
@@ -157,6 +280,14 @@ function maskWord(sentence, word) {
         text = text.replace(regex, "___");
         for (const m of match) {
           if (!answers.includes(m)) answers.push(m);
+          for (const b of allBases) {
+            const inflectedForms = inflectLike(b, m, cleanT);
+            for (const inf of inflectedForms) {
+              if (inf && !answers.includes(inf)) {
+                answers.push(inf);
+              }
+            }
+          }
         }
       }
     }
